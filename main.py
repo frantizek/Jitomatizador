@@ -1,16 +1,18 @@
 
-def validate_float(number: float):
+def validate_float(number: float, minimo_por_caja: int):
     """Validate that the number we get from the user is valid (at least from the perspective of the
     "factura" we would generate)
 
     Args:
         number (float): The input from the user that (at this point) we know is a number, but we need
         to be equal or greater than one.
+        minimo_por_caja (int): The price in market that will be used as the base price to generate the amount in the
+        factura.
 
     Returns:
         True if the number meets the criteria, False otherwise.
     """
-    if number >= 1.0:
+    if number >= float(minimo_por_caja):
         return True
     else:
         return False
@@ -18,14 +20,14 @@ def validate_float(number: float):
 
 def jitomatizante(pesos, centavos, diferencia, costo_maximo_caja=469, costo_minimo_caja=180):
     """
-    Uses the information from the amount to determine different ways to creae the "factura"
+    Uses the information from the amount to determine different ways to create the "factura"
 
     Args:
         pesos (int): from the original amount the integers.
         centavos (float): the remainder if we take away the integer part of the original amount.
-        diferencia (int): a local variable that we use when the amount cannot be contained in the max or minimun
-        costo_maximo_caja (int): upper limit that we use to bill a single tomatoe box
-        costo_minimo_caja (int): lower limit that we use to bill a single tomatoe box
+        diferencia (int): a local variable that we use when the amount cannot be contained in the max or minimum
+        costo_maximo_caja (int): upper limit that we use to bill a single tomato box
+        costo_minimo_caja (int): lower limit that we use to bill a single tomato box
 
     Returns:
         Prints to the output the different scenarios that can be used to bill the amount.
@@ -74,7 +76,7 @@ def separa_pesos_centavos(cantidad: float):
     return pesos, centavos
 
 
-def main():
+def main(costo_minimo_por_caja: int = 179):
     while True:
         try:
             cantidad_por_facturar = float(input("¿Cantidad a facturar? : "))
@@ -82,7 +84,7 @@ def main():
             print("Sorry, solo puedo facturar numeros.")
             continue
         else:
-            if validate_float(cantidad_por_facturar):
+            if validate_float(cantidad_por_facturar, costo_minimo_por_caja):
                 break
             else:
                 print("Sorry, ese no es un numero que podemos facturar.")
@@ -92,7 +94,7 @@ def main():
     pesos, centavos = separa_pesos_centavos(cantidad_por_facturar)
     print(f"La factura es por {pesos} pesos con {centavos:.2f} centavos.")
     diferencia = 0
-    jitomatizante(pesos, centavos, diferencia)
+    jitomatizante(pesos, centavos, diferencia, costo_minimo_caja=costo_minimo_por_caja)
 
 
 if __name__ == "__main__":
