@@ -1,59 +1,99 @@
-def isprime(num) -> bool:
-    for n in range(2,int(num**0.5)+1):
-        if num%n==0:
-            return False
-    return True
 
-def calcula_valor_caja(cantidad_por_facturar):
-    for valor_caja in range(159, 491, 1):
-        if cantidad_por_facturar == 0:
-            return valor_caja
-    return None
+def validate_float(number: float):
+    """Validate that the number we get from the user is valid (at least from the perspective of the
+    "factura" we would generate)
 
+    Args:
+        number (float): The input from the user that (at this point) we know is a number, but we need
+        to be equal or greater than one.
+
+    Returns:
+        True if the number meets the criteria, False otherwise.
+    """
+    if number >= 1.0:
+        return True
+    else:
+        return False
+
+
+def jitomatizante(pesos, centavos, diferencia, costo_maximo_caja=469, costo_minimo_caja=180):
+    """
+    Uses the information from the amount to determine different ways to creae the "factura"
+
+    Args:
+        pesos (int): from the original amount the integers.
+        centavos (float): the remainder if we take away the integer part of the original amount.
+        diferencia (int): a local variable that we use when the amount cannot be contained in the max or minimun
+        costo_maximo_caja (int): upper limit that we use to bill a single tomatoe box
+        costo_minimo_caja (int): lower limit that we use to bill a single tomatoe box
+
+    Returns:
+        Prints to the output the different scenarios that can be used to bill the amount.
+    """
+    encontre_respuesta = False
+    for valor_caja in range(costo_maximo_caja, costo_minimo_caja, -1):
+        if pesos % valor_caja == 0:
+            if diferencia > 0:
+                print(f"   BINGO!!! \n"
+                      f"      Sólo necesitas hacer una factura con los siguientes montos: \n"
+                      f"     {int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
+                      f"      1 caja  a un costo de ${valor_caja - diferencia + centavos:.2f}")
+                encontre_respuesta = True
+                continue
+            elif centavos == 0.00:
+                print(f"   BINGO!!! Sólo necesitas hacer una factura por {int(pesos / valor_caja)} "
+                      f"cajas a un costo de ${valor_caja}.00")
+                encontre_respuesta = True
+            else:
+                print(f"   BINGO!!! \n"
+                      f"      Sólo necesitas hacer una factura con los siguientes montos: \n"
+                      f"     {int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
+                      f"      1 caja  a un costo de ${valor_caja + centavos:.2f}")
+                encontre_respuesta = True
+    if encontre_respuesta is True:
+        return
+    else:
+        diferencia += 1
+        pesos += 1
+        jitomatizante(pesos, centavos, diferencia)
+
+
+def separa_pesos_centavos(cantidad: float):
+    """Since this is modeling an amount of money, we need to split the complete pesos from the centavos
+
+    Args:
+        cantidad (float): This is the original amount that we need to split.
+
+    Returns:
+        tuple:
+            pesos (int) This is the integer part of the number.
+            centavos (float) The decimals and remaining from the original amount.
+    """
+    centavos = round(cantidad % 1, 2)
+    pesos = int(cantidad // 1)
+    return pesos, centavos
 
 
 def main():
-    cantidad = 5435.40+5139.34
-    # cantidad_factura = float(input("¿Cantidad a facturar? : "))
-    # cantidad_factura = int(4392.44)
-    cantidad_factura = int(cantidad)
-    # valor_real_factura = float(4392.44)
-    valor_real_factura = float(cantidad)
-
-    print(isprime(cantidad))
-
-    encontre_una_solucion = False
-    cantidad_por_compensar = 0
-    existe_remanente = False
-
-    print(f"Total a facturar {valor_real_factura:.2f} = {cantidad_factura} + {(valor_real_factura-float(cantidad_factura)):.2f} (diferencia de 1 caja) ")
-
-    if (valor_real_factura-float(cantidad_factura)) != 0:   
-        existe_remanente = True
-
-    # while encontre_una_solucion == False:
-
-    #     valor_caja =calcula_valor_caja(cantidad_factura)
-
-    #     if  valor_caja != None:
-    #         encontre_una_solucion = True
-    #     else:
-    #         cantidad_por_compensar += 1
-    #         cantidad_factura -= 1
-
-    for valor_caja in range(154, 499, 1):
-        if cantidad_factura%valor_caja == 0:
-            encontre_una_solucion = True
-            # Si encontramos las n combinaciones se van a mostrar aqui
-            # en el "peor" de los casos y considerando las cantidades puede que sea entre 10
-            if existe_remanente:
-                print(f" BINGO!!! \nSólo necesitas hacer una factura con los siguientes montos: \n     {int(cantidad_factura/valor_caja)-1} cajas a un costo de ${valor_caja}.00 \n      1 caja  a un costo de ${valor_caja+valor_real_factura-float(cantidad_factura):.2f}")
+    while True:
+        try:
+            cantidad_por_facturar = float(input("¿Cantidad a facturar? : "))
+        except ValueError:
+            print("Sorry, solo puedo facturar numeros.")
+            continue
+        else:
+            if validate_float(cantidad_por_facturar):
+                break
             else:
-                print(f" BINGO!!! Sólo necesitas hacer una factura por {int(cantidad_factura/valor_caja)} cajas a un costo de ${valor_caja}.00")
-    # else:
-    #     print(f" BINGO!!! \nSólo necesitas hacer una factura con los siguientes montos: \n     {int(cantidad_factura/valor_caja)-1} cajas a un costo de ${valor_caja}.00 \n      1 caja  a un costo de ${(valor_caja+cantidad_por_compensar)+(valor_real_factura-float(cantidad_factura)):.2f}")
-                
-        
+                print("Sorry, ese no es un numero que podemos facturar.")
+                continue
+    cantidad_por_facturar = round(cantidad_por_facturar, 2)
+    print(f"Entendido, vamos a intentar jitomatizar la cantidad de : ${cantidad_por_facturar:.2f}")
+    pesos, centavos = separa_pesos_centavos(cantidad_por_facturar)
+    print(f"La factura es por {pesos} pesos con {centavos:.2f} centavos.")
+    diferencia = 0
+    jitomatizante(pesos, centavos, diferencia)
+
 
 if __name__ == "__main__":
     main()
