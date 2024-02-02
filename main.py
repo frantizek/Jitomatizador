@@ -1,5 +1,5 @@
 
-def validate_float(number: float, minimo_por_caja: int):
+def validate_float(number: float, minimo_por_caja: int) -> bool:
     """Validate that the number we get from the user is valid (at least from the perspective of the
     "factura" we would generate)
 
@@ -18,7 +18,8 @@ def validate_float(number: float, minimo_por_caja: int):
         return False
 
 
-def jitomatizante(pesos, centavos, diferencia, costo_maximo_caja=469, costo_minimo_caja=180):
+def jitomatizante(pesos: int, centavos: float, diferencia: int,
+                  costo_maximo_caja: int=469, costo_minimo_caja: int=180) -> None:
     """
     Uses the information from the amount to determine different ways to create the "factura"
 
@@ -60,23 +61,25 @@ def jitomatizante(pesos, centavos, diferencia, costo_maximo_caja=469, costo_mini
         jitomatizante(pesos, centavos, diferencia)
 
 
-def separa_pesos_centavos(cantidad: float):
+def separa_pesos_centavos(cantidad: float) -> tuple:
     """Since this is modeling an amount of money, we need to split the complete pesos from the centavos
 
     Args:
         cantidad (float): This is the original amount that we need to split.
 
     Returns:
-        tuple:
-            pesos (int) This is the integer part of the number.
-            centavos (float) The decimals and remaining from the original amount.
+        a tuple of (int, float)
+
+        pesos (int) This is the integer part of the number.
+
+        centavos (float) The decimals and remaining from the original amount.
     """
     centavos = round(cantidad % 1, 2)
     pesos = int(cantidad // 1)
     return pesos, centavos
 
 
-def main(costo_minimo_por_caja: int = 179):
+def main(costo_minimo_por_caja: int = 179) -> None:
     while True:
         try:
             cantidad_por_facturar = float(input("¿Cantidad a facturar? : "))
