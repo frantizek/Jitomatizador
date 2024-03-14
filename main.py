@@ -1,64 +1,39 @@
+from tkinter import *
 
-def validate_float(number: float, minimo_por_caja: int) -> bool:
-    """Validate that the number we get from the user is valid (at least from the perspective of the
-    "factura" we would generate)
+root = Tk()
+root.geometry("600x500")
+root.title("Jitomatizador")
+
+
+def validar_entrada(texto):
+    """
+    Valida si el texto dado es un número válido.
 
     Args:
-        number (float): The input from the user that (at this point) we know is a number, but we need
-        to be equal or greater than one.
-        minimo_por_caja (int): The price in market that will be used as the base price to generate the amount in the
-        factura.
+    texto (str): El texto a validar.
 
     Returns:
-        True if the number meets the criteria, False otherwise.
+    bool: True si el texto es un número válido, False en caso contrario.
     """
-    if number >= float(minimo_por_caja):
-        return True
-    else:
+
+    try:
+        # Convertir el texto a un número de punto flotante
+        float(texto)
+        if float(texto) == 0.0:
+            return False
+    except ValueError:
+        # Si no se puede convertir a un número de punto flotante, no es un número válido
         return False
 
+    # Si el texto es una cadena vacía, no es un número válido
+    if not texto:
+        return False
 
-def jitomatizante(pesos: int, centavos: float, diferencia: int,
-                  costo_maximo_caja: int=469, costo_minimo_caja: int=180) -> None:
-    """
-    Uses the information from the amount to determine different ways to create the "factura"
+    # Si el texto contiene letras, no es un número válido
+    if any(letra.isalpha() for letra in texto):
+        return False
 
-    Args:
-        pesos (int): from the original amount the integers.
-        centavos (float): the remainder if we take away the integer part of the original amount.
-        diferencia (int): a local variable that we use when the amount cannot be contained in the max or minimum
-        costo_maximo_caja (int): upper limit that we use to bill a single tomato box
-        costo_minimo_caja (int): lower limit that we use to bill a single tomato box
-
-    Returns:
-        Prints to the output the different scenarios that can be used to bill the amount.
-    """
-    encontre_respuesta = False
-    for valor_caja in range(costo_maximo_caja, costo_minimo_caja, -1):
-        if pesos % valor_caja == 0:
-            if diferencia > 0:
-                print(f"   BINGO!!! \n"
-                      f"      Sólo necesitas hacer una factura con los siguientes montos: \n"
-                      f"     {int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
-                      f"      1 caja  a un costo de ${valor_caja - diferencia + centavos:.2f}")
-                encontre_respuesta = True
-                continue
-            elif centavos == 0.00:
-                print(f"   BINGO!!! Sólo necesitas hacer una factura por {int(pesos / valor_caja)} "
-                      f"cajas a un costo de ${valor_caja}.00")
-                encontre_respuesta = True
-            else:
-                print(f"   BINGO!!! \n"
-                      f"      Sólo necesitas hacer una factura con los siguientes montos: \n"
-                      f"     {int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
-                      f"      1 caja  a un costo de ${valor_caja + centavos:.2f}")
-                encontre_respuesta = True
-    if encontre_respuesta is True:
-        return
-    else:
-        diferencia += 1
-        pesos += 1
-        jitomatizante(pesos, centavos, diferencia)
+    return True
 
 
 def separa_pesos_centavos(cantidad: float) -> tuple:
@@ -79,26 +54,79 @@ def separa_pesos_centavos(cantidad: float) -> tuple:
     return pesos, centavos
 
 
-def main(costo_minimo_por_caja: int = 179) -> None:
-    while True:
-        try:
-            cantidad_por_facturar = float(input("¿Cantidad a facturar? : "))
-        except ValueError:
-            print("Sorry, solo puedo facturar numeros.")
-            continue
-        else:
-            if validate_float(cantidad_por_facturar, costo_minimo_por_caja):
-                break
-            else:
-                print("Sorry, ese no es un numero que podemos facturar.")
+def jitomatizante(pesos: int, centavos: float, diferencia: int,
+                  costo_maximo_caja: int = 280, costo_minimo_caja: int = 101) -> str:
+    """
+    Uses the information from the amount to determine different ways to create the "factura"
+
+    Args:
+        pesos (int): from the original amount the integers.
+        centavos (float): the remainder if we take away the integer part of the original amount.
+        diferencia (int): a local variable that we use when the amount cannot be contained in the max or minimum
+        costo_maximo_caja (int): upper limit that we use to bill a single tomato box
+        costo_minimo_caja (int): lower limit that we use to bill a single tomato box
+
+    Returns:
+        Prints to the output the different scenarios that can be used to bill the amount.
+    """
+    encontre_respuesta = False
+    line = "\n"
+    for valor_caja in range(costo_maximo_caja, costo_minimo_caja, -1):
+        if pesos % valor_caja == 0:
+            if diferencia > 0:
+                line += (f"\nPuedes hacer una factura con los siguientes montos: \n "
+                         f"{int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
+                         f"   1 caja  a un costo de ${valor_caja - diferencia + centavos:.2f}\n\n")
+                encontre_respuesta = True
                 continue
-    cantidad_por_facturar = round(cantidad_por_facturar, 2)
-    print(f"Entendido, vamos a intentar jitomatizar la cantidad de : ${cantidad_por_facturar:.2f}")
-    pesos, centavos = separa_pesos_centavos(cantidad_por_facturar)
-    print(f"La factura es por {pesos} pesos con {centavos:.2f} centavos.")
-    diferencia = 0
-    jitomatizante(pesos, centavos, diferencia, costo_minimo_caja=costo_minimo_por_caja)
+            elif centavos == 0.00:
+                line += (f"\nPuedes hacer una factura por {int(pesos / valor_caja)} "
+                      f"cajas a un costo de ${valor_caja}.00\n\n")
+                encontre_respuesta = True
+            else:
+                line += (f"\n"
+                      f"Puedes hacer una factura con los siguientes montos: \n"
+                      f"     {int(pesos / valor_caja) - 1} cajas a un costo de ${valor_caja}.00 \n"
+                      f"        1 caja  a un costo de ${valor_caja + centavos:.2f}\n\n")
+                encontre_respuesta = True
+    if encontre_respuesta is True:
+        return str(line)
+    else:
+        diferencia += 1
+        pesos += 1
+        return jitomatizante(pesos, centavos, diferencia)
 
 
-if __name__ == "__main__":
-    main()
+def carga_jitomatizador():
+
+    Output.delete('1.0', END)
+    if validar_entrada(inputtxt.get("1.0", "end-1c")):
+        cantidad_por_facturar = float(inputtxt.get("1.0", "end-1c"))
+        pesos, centavos = separa_pesos_centavos(cantidad_por_facturar)
+        TerribleLongAnswer = f"La factura es por {pesos} pesos con {centavos:.2f} centavos."
+        diferencia = 0
+
+        Output.insert(END, TerribleLongAnswer + "\n" + str(jitomatizante(pesos, centavos, diferencia)))
+
+
+l = Label(text="\n¿Cantidad a facturar? \n")
+
+inputtxt = Text(root, height=1,
+                width=15, undo=True, wrap=NONE,
+                bg="light yellow")
+
+Output = Text(root, height=24,
+              width=60,
+              bg="white")
+
+Display = Button(root, height=1,
+                 width=20,
+                 text="Jitomatiza",
+                 command=lambda: carga_jitomatizador())
+
+l.pack()
+inputtxt.pack()
+Display.pack()
+Output.pack()
+
+mainloop()
